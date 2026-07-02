@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "module": "UMD",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+    "declaration": true,
+    "outDir": "./dist/umd",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["DOM", "ES2015", "ES2022"],
+    "types": ["jquery"]
+  },
+  "include": ["src/**/*"]
+}

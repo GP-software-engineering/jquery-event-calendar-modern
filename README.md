@@ -1,0 +1,81 @@
+# jQuery Event Calendar (v2.0.0)
+
+A robust, lightweight, and fully responsive Event Calendar plugin for jQuery. 
+Originally branched from v0.7 by Jaime Fernandez, this plugin has been completely refactored in modern TypeScript using Object-Oriented Programming principles to ensure ease of testing, and maintenance.
+
+## Features
+* **JSON Driven**: Load events statically via arrays or dynamically via AJAX.
+* **Localization Support**: Easily extensible `i18n` configurations.
+* **Responsive**: Automatically adapts to container widths.
+* **No Breaking UI Changes**: Drop-in replacement for older versions.
+
+## Installation
+
+You can include the plugin by grabbing the compiled JavaScript from the `/dist` folder.
+
+Dependencies required:
+* jQuery (v3.0+)
+* Moment.js
+
+```html
+<link rel="stylesheet" href="css/eventCalendar.css">
+<script src="[https://code.jquery.com/jquery-3.6.0.min.js](https://code.jquery.com/jquery-3.6.0.min.js)"></script>
+<script src="[https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js](https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js)"></script>
+<script src="dist/jquery.eventCalendar.js"></script>
+```
+
+## Configuration & Usage
+
+### 1. Include the Styles
+You can use the pre-compiled CSS from the `dist/css` folder, or import the SCSS file directly into your build pipeline to override the default Sass variables (colors, borders, etc.):
+
+```html
+<link rel="stylesheet" href="dist/css/eventCalendar.css">
+```
+
+### 2. Passing Events (`jsonData`)
+The plugin accepts events either as a static JavaScript array or as a URL string to fetch JSON via AJAX.
+
+Events must adhere to the IEvent interface:
+```JavaScript
+const myEvents = [
+    {
+        date: "2024-12-25 10:00:00",    // Date format depends on `jsonDateFormat` option
+        title: "Christmas Track Day",   // Display name
+        url: "[https://example.com](https://example.com)",     // Optional link
+        description: "Join us on the track for Christmas!", 
+        isLocked: false,                // Show the "cross" icon on the calendar
+        isSpecial: true                 // Show the "exclamation" coin icon
+    }
+];
+
+// Initialize
+$('#myCalendar').eventCalendar({
+    jsonData: myEvents,
+    jsonDateFormat: "human", // "human" parses YYYY-MM-DD HH:MM:SS. "timestamp" parses unix ms.
+    showDescription: true,
+    openEventInNewWindow: true
+});
+```
+
+### 3. Asynchronous Loading (AJAX)
+If you pass a URL string instead of an array, the plugin will make a GET request to your server. It automatically appends current calendar state parameters so your backend can return paginated data:
+
+	GET /api/events?limit=4&year=2024&month=11&day=0
+
+
+```JavaScript
+$('#myCalendar').eventCalendar({
+    jsonData: "/api/events",
+    cacheJson: false // Set to false to trigger a new AJAX call every time the user changes the month
+});
+```
+
+## Development & Building
+
+If you want to contribute or modify the source:
+
+1. Clone the repository.
+2. Run npm install to grab all development dependencies.
+3. Run npm run build to compile the TypeScript files into the /dist folder.
+4. Run npm run test to execute the Jest test suites.

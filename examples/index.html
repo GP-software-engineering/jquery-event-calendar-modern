@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jQuery Event Calendar - Examples</title>
+    
+    <link rel="stylesheet" href="../dist/css/eventCalendar.css">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 40px 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #138da5;
+            margin-bottom: 40px;
+        }
+        h2 {
+            border-bottom: 2px solid #138da5;
+            padding-bottom: 10px;
+            color: #333;
+            margin-top: 50px;
+        }
+        /* Layout for the multi-calendar section */
+        .calendar-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .calendar-column {
+            flex: 1;
+            min-width: 300px;
+        }
+        .demo-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>jQuery Event Calendar Demonstration</h1>
+
+    <h2>1. Single Calendar Instance</h2>
+    <div class="demo-box">
+        <p>This section displays a standard single calendar instance with custom dynamically generated events.</p>
+        <div id="single-calendar"></div>
+    </div>
+
+    <h2>2. Multiple Isolated Instances (Side by Side)</h2>
+    <p>Thanks to the new Object-Oriented class architecture, multiple calendars can coexist on the same page with isolated states and completely different datasets without any conflict.</p>
+    
+    <div class="calendar-grid">
+        <div class="calendar-column">
+            <div class="demo-box">
+                <h3>Track Days Schedule</h3>
+                <div id="multi-calendar-1"></div>
+            </div>
+        </div>
+        
+        <div class="calendar-column">
+            <div class="demo-box">
+                <h3>Driving Courses Schedule</h3>
+                <div id="multi-calendar-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+
+<script src="../dist/umd/jquery.eventCalendar.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // ====================================================================
+        // DYNAMIC EVENT GENERATION
+        // Generating dates relative to "today" using Moment.js
+        // ====================================================================
+        
+        // Base past and future dates relative to execution time
+        const threeDaysAgo = moment().subtract(3, 'days').format('YYYY-MM-DD 10:00:00');
+        const yesterday    = moment().subtract(1, 'days').format('YYYY-MM-DD 15:30:00');
+        const today        = moment().format('YYYY-MM-DD 12:00:00');
+        const tomorrow     = moment().add(1, 'days').format('YYYY-MM-DD 09:00:00');
+        const nextWeek     = moment().add(5, 'days').format('YYYY-MM-DD 16:00:00');
+
+        // Dataset for Calendar 1 (Single / Main Demo)
+        const mainEvents = [
+            { date: threeDaysAgo, title: "Past Track Day Session", description: "This event happened 3 days ago.", isLocked: true },
+            { date: today, title: "Current Maintenance Window", description: "Today's ongoing circuit operations.", isSpecial: true },
+            { date: tomorrow, title: "Upcoming Advanced Driving Course", description: "Registration opens tomorrow morning." },
+            { date: nextWeek, title: "Exclusive Supercar Rally", description: "Future special track event.", isSpecial: true }
+        ];
+
+        // Dataset for Multi-Calendar 1 (Track Days)
+        const trackEvents = [
+            { date: yesterday, title: "Motorcycle Free Practice", description: "Yesterday's open pit-lane session for bikes." },
+            { date: tomorrow, title: "Private GT3 Practice", description: "High-speed future event testing session.", isLocked: true }
+        ];
+
+        // Dataset for Multi-Calendar 2 (Driving Courses)
+        const courseEvents = [
+            { date: threeDaysAgo, title: "Basic Safety Briefing", description: "Introductory classroom session held 3 days ago." },
+            { date: today, title: "Drift Control Masterclass", description: "Live drifting course running on the wet track today!", isSpecial: true },
+            { date: nextWeek, title: "Pro Racing License Exam", description: "Official theoretical and practical evaluation.", isLocked: false }
+        ];
+
+        // ====================================================================
+        // PLUGINS INITIALIZATION
+        // ====================================================================
+        
+        // 1. Initialize Single Calendar
+        $('#single-calendar').eventCalendar({
+            jsonData: mainEvents,
+            jsonDateFormat: 'human',
+            showDescription: true
+        });
+
+        // 2. Initialize Multi-Calendar Instance 1
+        $('#multi-calendar-1').eventCalendar({
+            jsonData: trackEvents,
+            jsonDateFormat: 'human',
+            showDescription: false,
+            onlyOneDescription: true
+        });
+
+        // 3. Initialize Multi-Calendar Instance 2
+        $('#multi-calendar-2').eventCalendar({
+            jsonData: courseEvents,
+            jsonDateFormat: 'human',
+            showDescription: false,
+            onlyOneDescription: true
+        });
+    });
+</script>
+</body>
+</html>
