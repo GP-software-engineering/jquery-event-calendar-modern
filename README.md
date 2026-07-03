@@ -1,42 +1,60 @@
-# jQuery Event Calendar (v2.0.0)
+# 📅 jQuery Event Calendar (v2.0.0)
 
-A robust, lightweight, and fully responsive Event Calendar plugin for jQuery. 
+[![npm version](https://img.shields.io/npm/v/jquery-event-calendar-modern.svg?color=blue)](https://www.npmjs.com/package/jquery-event-calendar-modern)
+[![npm downloads](https://img.shields.io/npm/dt/jquery-event-calendar-modern.svg)](https://www.npmjs.com/package/jquery-event-calendar-modern)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)](https://GP-software-engineering.github.io/jquery-event-calendar-modern/examples/index.html)
+
+> A robust, lightweight, and fully responsive Event Calendar plugin for jQuery. 
 Originally branched from v0.7 by Jaime Fernandez, this plugin has been completely refactored in modern TypeScript using Object-Oriented Programming principles to ensure ease of testing, and maintenance.
 
-## Features
+### 👉 [Click here to view the Live Demo](https://GP-software-engineering.github.io/jquery-event-calendar-modern/examples/index.html)
+
+---
+
+## ✨ Features
 * **JSON Driven**: Load events statically via arrays or dynamically via AJAX.
 * **Localization Support**: Easily extensible `i18n` configurations.
 * **Responsive**: Automatically adapts to container widths.
 * **No Breaking UI Changes**: Drop-in replacement for older versions.
 
-## Installation
+## 🚀 Installation
 
-You can include the plugin by grabbing the compiled JavaScript from the `/dist` folder.
+You can install the package via NPM:
 
-Dependencies required:
+```bash
+npm install jquery-event-calendar-modern
+```
+
+or you can include the plugin by grabbing the compiled JavaScript from the `/dist` folder.
+
+**Dependencies required:**
+
 * jQuery (v3.0+)
 * Moment.js
 
 ```html
 <link rel="stylesheet" href="css/eventCalendar.css">
-<script src="[https://code.jquery.com/jquery-3.6.0.min.js](https://code.jquery.com/jquery-3.6.0.min.js)"></script>
-<script src="[https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js](https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js)"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script src="dist/jquery.eventCalendar.js"></script>
 ```
 
-## Configuration & Usage
+**Include the Styles:**
 
-### 1. Include the Styles
 You can use the pre-compiled CSS from the `dist/css` folder, or import the SCSS file directly into your build pipeline to override the default Sass variables (colors, borders, etc.):
 
 ```html
 <link rel="stylesheet" href="dist/css/eventCalendar.css">
 ```
 
-### 2. Passing Events (`jsonData`)
-The plugin accepts events either as a static JavaScript array or as a URL string to fetch JSON via AJAX.
+## 🛠️ Quick Start
 
+Initialize the calendar by targeting an empty `<div>` and passing your options.
+The plugin accepts events either as a static JavaScript array or as a URL string to fetch JSON via AJAX.<br>
 Events must adhere to the IEvent interface:
+
 ```JavaScript
 const myEvents = [
     {
@@ -58,7 +76,7 @@ $('#myCalendar').eventCalendar({
 });
 ```
 
-### 3. Asynchronous Loading (AJAX)
+#### Asynchronous Loading (AJAX)
 If you pass a URL string instead of an array, the plugin will make a GET request to your server. It automatically appends current calendar state parameters so your backend can return paginated data:
 
 	GET /api/events?limit=4&year=2024&month=11&day=0
@@ -71,11 +89,13 @@ $('#myCalendar').eventCalendar({
 });
 ```
 
-## Development & Building
+## 🤝 Development & Contributing
 
 If you want to contribute or modify the source:
 
 1. Clone the repository.
-2. Run npm install to grab all development dependencies.
-3. Run npm run build to compile the TypeScript files into the /dist folder.
-4. Run npm run test to execute the Jest test suites.
+2. Run `npm install` to grab all development dependencies.
+3. Run `npm run build` to compile the TypeScript files into the `/dist` folder.
+4. Run `npm run test` to execute the Jest test suites.
+
+Maintained with ❤️ by GP Software Engineering.
