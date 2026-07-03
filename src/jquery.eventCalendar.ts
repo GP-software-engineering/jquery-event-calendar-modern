@@ -9,16 +9,29 @@
 declare const moment: any;
 
 namespace EventCalendar {
+    /**
+     * Represents a single event object to be rendered on the calendar.
+     */
     export interface IEvent {
+        /** Date of the event. Can be a timestamp or a formatted string. */
         date?: number | string;
+        /** Optional offset for the event date calculation. */
         offset?: number;
+        /** Title of the event displayed in the list. */
         title?: string;
+        /** URL to redirect the user when the event title is clicked. */
         url?: string;
+        /** Description of the event displayed when the title is toggled. */
         description?: string;
+        /** Indicates if the event is locked (displays a cross icon). */
         isLocked?: boolean;
+        /** Indicates if the event is special (displays an exclamation mark icon). */
         isSpecial?: boolean;
     }
 
+    /**
+     * Localization settings for text strings and date formats.
+     */
     export interface II18n {
         locale: string;
         monthNames: string[];
@@ -37,28 +50,53 @@ namespace EventCalendar {
         moment?: any;
     }
 
+    /**
+     * Configuration options for initializing the EventCalendar plugin.
+     */
     export interface IEventCalendarOptions {
+        /** Array of events or a URL string to fetch events via AJAX. */
         jsonData: IEvent[] | string;
+        /** Cache JSON results to avoid multiple AJAX calls for the same month. */
         cacheJson?: boolean;
+        /** Locale key (e.g., 'en-US') to load specific translations. */
         localeKey?: string;
+        /** Direct object for i18n configurations. */
         i18n?: II18n;
+        /** Maximum number of events to show in the list. */
         eventsLimit?: number;
+        /** Display the event time next to the title. */
         showTimeOfEvent?: boolean;
+        /** Display days in a traditional grid/week layout. */
         showDayAsWeeks?: boolean;
+        /** Display empty days from previous/next months to fill the grid. */
         showDaysOfOtherMonths?: boolean;
+        /** Force the week to start on Monday instead of Sunday. */
         startWeekOnMonday?: boolean;
+        /** Display day names (Mon, Tue, etc.) in the calendar header. */
         showDayNameInCalendar?: boolean;
+        /** Display events that do not have a specific date assigned. */
         showEventsWithoutDate?: boolean;
+        /** Show event descriptions by default. */
         showDescription?: boolean;
+        /** Automatically close other descriptions when opening a new one. */
         onlyOneDescription?: boolean;
+        /** Initialize the calendar on the first upcoming month containing events. */
         showFirstMonthWithEvents?: boolean;
+        /** Open event URLs in a new browser tab. */
         openEventInNewWindow?: boolean;
+        /** Enable scrollbar for the events list container. */
         eventsScrollable?: boolean;
+        /** Expected format of the incoming event dates ('timestamp' or 'human'). */
         jsonDateFormat?: "timestamp" | "human";
+        /** Animation speed in milliseconds for month transitions. */
         moveSpeed?: number;
+        /** Opacity level during the month transition animation. */
         moveOpacity?: number;
+        /** Optional hooks for user interaction events. */
         callbacks?: {
+            /** Fired when a user clicks on a specific day. */
             changeDay?: (date: Date) => void;
+            /** Fired when the month is changed. */
             changeMonth?: () => void;
         };
     }
@@ -67,15 +105,25 @@ namespace EventCalendar {
 // ============================================================================
 // TYPING AUGMENTATION
 // ============================================================================
+
+/**
+ * Extends jQuery plugin structure to include default options.
+ */
 interface IEventCalendarPlugin {
     (options?: EventCalendar.IEventCalendarOptions): JQuery;
     options: EventCalendar.IEventCalendarOptions;
 }
 
+/**
+ * Injects the eventCalendar method into the global JQuery interface.
+ */
 interface JQuery {
     eventCalendar: IEventCalendarPlugin;
 }
 
+/**
+ * Tracks the current active state of the calendar view.
+ */
 interface ICalendarState {
     year: number;
     month: number;
@@ -93,6 +141,11 @@ class EventCalendarInstance {
     private cachedEvents: EventCalendar.IEvent[] | null = null;
     private directionLeftMove: number = 300;
 
+    /**
+     * Initializes the calendar instance.
+     * @param element The DOM element to attach the calendar to.
+     * @param options Configuration options.
+     */
     constructor(element: HTMLElement, options: EventCalendar.IEventCalendarOptions) {
         this.$wrap = $(element);
         this.options = this.mergeOptions(options);
@@ -100,15 +153,24 @@ class EventCalendarInstance {
         this.init();
     }
 
+    /**
+     * Merges user-provided options with default plugin options.
+     * @param options User-provided options.
+     * @returns A deeply merged options object.
+     */
     private mergeOptions(options: EventCalendar.IEventCalendarOptions): EventCalendar.IEventCalendarOptions {
         const defaults = $.fn.eventCalendar.options;
         return $.extend(true, {}, defaults, options);
     }
 
+    /**
+     * Bootstraps the application by rendering the DOM and fetching events.
+     */
     private init(): void {
         this.buildDOMStructure();
         this.attachEventListeners();
         
+        // Calculate dynamic width to handle slide animations properly
         this.directionLeftMove = this.$wrap.width() || 300;
         $(window).on('resize', () => { this.directionLeftMove = this.$wrap.width() || 300; });
 
@@ -116,6 +178,9 @@ class EventCalendarInstance {
         this.fetchAndRenderEvents();
     }
 
+    /**
+     * Constructs the main HTML skeleton inside the wrapper element.
+     */
     private buildDOMStructure(): void {
         const loadingTxt = this.options.i18n?.txt_loading || "loading...";
         this.$wrap.addClass('eventCalendar-wrap').html(`
@@ -130,6 +195,9 @@ class EventCalendarInstance {
         `);
     }
 
+    /**
+     * Binds click events to the dynamically generated DOM elements.
+     */
     private attachEventListeners(): void {
         this.$wrap.on('click', '[name="arrow"]', (e) => {
             e.preventDefault();
@@ -142,6 +210,8 @@ class EventCalendarInstance {
             const day = parseInt($(e.currentTarget).parent().attr('rel') || "0", 10);
             this.state = { ...this.state, day, direction: 'day' };
             this.fetchAndRenderEvents();
+            
+            // Trigger external callback if provided
             if (this.options.callbacks?.changeDay) {
                 this.options.callbacks.changeDay(new Date(this.state.year, this.state.month, day));
             }
@@ -152,6 +222,7 @@ class EventCalendarInstance {
                 e.preventDefault();
                 const $desc = $(e.currentTarget).siblings('.eventCalendar-eventDesc');
                 
+                // Inject the 'Go to event' button dynamically if missing
                 if (!$desc.find('a.bt').length) {
                     const url = $(e.currentTarget).attr('href');
                     const target = $(e.currentTarget).attr('target') || "_self";
@@ -162,6 +233,7 @@ class EventCalendarInstance {
                 if ($desc.is(':visible')) {
                     $desc.slideUp();
                 } else {
+                    // Close sibling descriptions to keep the UI clean
                     if (this.options.onlyOneDescription) {
                         this.$wrap.find('.eventCalendar-eventDesc').slideUp();
                     }
@@ -171,6 +243,10 @@ class EventCalendarInstance {
         });
     }
 
+    /**
+     * Animates the transition between months.
+     * @param direction Target direction to slide the calendar.
+     */
     private changeMonth(direction: "next" | "prev"): void {
         this.renderMonth(direction);
         const moveOperator = direction === "next" ? "-=" : "+=";
@@ -178,6 +254,7 @@ class EventCalendarInstance {
         const moveOpacity = this.options.moveOpacity ?? 0.15;
         const moveSpeed = this.options.moveSpeed ?? 500;
 
+        // Animate out the old month grid
         this.$wrap.find('.eventCalendar-monthWrap.eventCalendar-oldMonth').animate({
             opacity: moveOpacity,
             left: `${moveOperator}${this.directionLeftMove}`
@@ -186,6 +263,10 @@ class EventCalendarInstance {
         });
     }
 
+    /**
+     * Builds and renders the grid for the requested month, including leading and trailing days.
+     * @param monthOrDirection Direction to render relative to the current state.
+     */
     private renderMonth(monthOrDirection: "current" | "next" | "prev"): void {
         const $slider = this.$wrap.find('.eventCalendar-slider');
         const date = new Date();
@@ -223,13 +304,59 @@ class EventCalendarInstance {
         }
 
         const $daysList = $newMonthWrap.find('.eventCalendar-daysList');
+        
+        if (this.options.showDayAsWeeks) {
+            $daysList.addClass('showDayNames');
+            let dayNames = this.options.i18n?.dayNamesShort || ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            // Shift Sunday to the end of the array if the week starts on Monday
+            if (this.options.startWeekOnMonday) {
+                dayNames = [...dayNames.slice(1), dayNames[0]];
+            }
+            
+            let dayHeadersHtml = "";
+            dayNames.forEach(name => {
+                dayHeadersHtml += `<li class='eventCalendar-day-header'>${name}</li>`;
+            });
+            $daysList.append(dayHeadersHtml);
+        }
+
+        // Calculate leading spaces (days from the previous month)
+        let firstDayOfMonth = new Date(this.state.year, this.state.month, 1).getDay();
+        if (this.options.startWeekOnMonday) {
+            firstDayOfMonth = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+        }
+
+        if (this.options.showDayAsWeeks) {
+            // Get the total number of days in the previous month
+            const prevMonthDays = new Date(this.state.year, this.state.month, 0).getDate();
+            
+            // Append muted days from the previous month
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                const dayNum = prevMonthDays - firstDayOfMonth + 1 + i;
+                $daysList.append(`<li class='eventCalendar-day eventCalendar-empty'><span class='eventCalendar-empty-date'>${dayNum}</span></li>`);
+            }
+        }
+
         const daysInMonth = new Date(this.state.year, this.state.month + 1, 0).getDate();
         const currentDay = new Date().getDate();
         const isCurrentMonth = date.getMonth() === new Date().getMonth() && date.getFullYear() === new Date().getFullYear();
 
+        // Append actual clickable days for the current month
         for (let day = 1; day <= daysInMonth; day++) {
             const isToday = isCurrentMonth && day === currentDay ? "today" : "";
             $daysList.append(`<li id='dayList_${day}' rel='${day}' class='eventCalendar-day ${isToday}'><a href='#'>${day}</a></li>`);
+        }
+
+        // Calculate and append trailing spaces (days for the next month)
+        if (this.options.showDayAsWeeks) {
+            const totalCells = firstDayOfMonth + daysInMonth;
+            const tailDays = (7 - (totalCells % 7)) % 7;
+            
+            // Append muted days for the next month
+            for (let i = 1; i <= tailDays; i++) {
+                $daysList.append(`<li class='eventCalendar-day eventCalendar-empty'><span class='eventCalendar-empty-date'>${i}</span></li>`);
+            }
         }
 
         $slider.append($newMonthWrap);
@@ -241,10 +368,14 @@ class EventCalendarInstance {
         }
     }
 
+    /**
+     * Fetches events via AJAX or reads from the local array and triggers rendering.
+     */
     private fetchAndRenderEvents(): void {
         this.$wrap.find('.eventCalendar-loading').fadeIn();
 
         if (typeof this.options.jsonData === "string") {
+            // Check cache before performing a new AJAX request
             if (!this.options.cacheJson || !this.cachedEvents) {
                 $.getJSON(`${this.options.jsonData}?limit=${this.options.eventsLimit}&year=${this.state.year}&month=${this.state.month}&day=${this.state.day}`)
                     .done((data: EventCalendar.IEvent[]) => {
@@ -261,12 +392,18 @@ class EventCalendarInstance {
         }
     }
 
+    /**
+     * Generates and appends the HTML list of events based on fetched data.
+     * @param data Array of events to be displayed.
+     */
     private renderEventsList(data: EventCalendar.IEvent[]): void {
         const $list = this.$wrap.find('.eventCalendar-list');
         let htmlEvents: string[] = [];
         
         data.forEach((event, index) => {
             const eventLinkTarget = this.options.openEventInNewWindow ? '_blank' : '_self';
+            
+            // Render title as an anchor tag if URL is provided, otherwise as a span
             const eventTitle = event.url 
                 ? `<a href="${event.url}" target="${eventLinkTarget}" class="eventCalendar-eventTitle clearfix">${event.title}</a>`
                 : `<span class="eventCalendar-eventTitle clearfix">${event.title}</span>`;
@@ -281,6 +418,7 @@ class EventCalendarInstance {
             `);
         });
 
+        // Show fallback message if dataset is empty
         if (htmlEvents.length === 0) {
             const noEventsTxt = this.options.i18n?.txt_noEvents || "No events";
             htmlEvents.push(`<li class="eventCalendar-noEvents clearfix"><p>${noEventsTxt}</p></li>`);

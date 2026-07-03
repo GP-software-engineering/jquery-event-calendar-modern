@@ -17,6 +17,7 @@ Originally branched from v0.7 by Jaime Fernandez, this plugin has been completel
 * **JSON Driven**: Load events statically via arrays or dynamically via AJAX.
 * **Localization Support**: Easily extensible `i18n` configurations.
 * **Responsive**: Automatically adapts to container widths.
+* **Customizable Styles**: Uses CSS Custom Properties (`:root` variables) for styling
 * **No Breaking UI Changes**: Drop-in replacement for older versions.
 
 ## 🚀 Installation
@@ -88,6 +89,35 @@ $('#myCalendar').eventCalendar({
     cacheJson: false // Set to false to trigger a new AJAX call every time the user changes the month
 });
 ```
+
+#### Theming & Dark Mode (CSS Native Variables)
+
+Version 2.0+ adopts CSS Custom Properties (`:root` variables) for styling. This makes the calendar incredibly easy to theme without needing to compile SCSS!
+
+**Dark Mode is supported out-of-the-box.** The calendar automatically detects the user's OS preferences `(prefers-color-scheme: dark)` and flips the color palette seamlessly.
+
+If you want to create a custom theme or integrate the calendar into your brand colors, simply override the CSS variables in your own stylesheet:
+
+```css
+/* Your custom stylesheet (loaded after eventCalendar.css) */
+:root {
+    /* Change the main theme color to purple */
+    --ec-title-bg: #6f42c1;
+    --ec-event-title-color: #6f42c1;
+    
+    /* Change the current day highlight to red */
+    --ec-today-bg: #dc3545;
+}
+```
+
+Here is the list of the most commonly modified variables:
+
+- `--ec-title-bg`: Background color of the top bar (Month/Year)
+- `--ec-event-title-color`: Text color for events in the list
+- `--ec-today-bg`: Highlight color for the current day
+- `--ec-event-bg`: Highlight color for days containing events
+
+---
 
 ## 🤝 Development & Contributing
 
