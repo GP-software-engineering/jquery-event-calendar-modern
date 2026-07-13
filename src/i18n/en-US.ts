@@ -2,13 +2,13 @@
 	jquery.eventCalendar.js
 */
 
-import { II18n } from '../types';
+import { GpsEventCalendar } from '../types';
 
-if (!(window as any).eventCalendar_i18n) {
-	(window as any).eventCalendar_i18n = {};
-}
+// Ensure the global namespace and i18n dictionary exist
+window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
+window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
 
-(window as any).eventCalendar_i18n['en-US'] = <II18n>{
+window.GpsEventCalendar.i18n['en-US'] = <GpsEventCalendar.II18n>{
 	locale: "en-us",
 	monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
 	monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],

@@ -6,23 +6,25 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 
 > A robust, lightweight, and fully responsive Event Calendar plugin for jQuery.
-> Originally branched from v0.7 by Jaime Fernandez, this plugin has been completely refactored in modern TypeScript using Object-Oriented Programming principles to ensure ease of testing, and maintenance.
+> Originally branched from v0.7 by Jaime Fernandez, this plugin has been completely refactored in modern TypeScript using Object-Oriented Programming principles to ensure strict typing, isolated instances, and ease of maintenance.
 
 #### 👉 [Documentation and live demo](https://GP-software-engineering.github.io/jquery-event-calendar/)
 
 #### 👉 [What's new](https://github.com/GP-software-engineering/jquery-event-calendar/blob/main/WHATSNEW.md)
 
-#### 👉 [Direct liink to the live demo](https://GP-software-engineering.github.io/jquery-event-calendar/examples/index.html)
+#### 👉 [Direct link to the live demo](https://GP-software-engineering.github.io/jquery-event-calendar/examples/index.html)
 
 ---
 
 ## ✨ Features
 
 * **JSON Driven**: Load events statically via arrays or dynamically via AJAX.
-* **Localization Support**: Easily extensible `i18n` configurations.
-* **Responsive**: Automatically adapts to container widths.
-* **Customizable Styles**: Uses CSS Custom Properties (`:root` variables) for styling.
-* **Keyboard Accessible**: Fully navigable via Tab, Enter, and Space keys.
+* **Modern Localization**: Global namespace-driven `i18n` with auto-fallback and runtime language switching.
+* **Isolated Instances & Memory Safety**: Safely initialize, update, and `destroy()` multiple independent calendars on the same page without memory leaks.
+* **Responsive & Mobile Ready**: Automatically adapts to container widths and features native **Swipe support** to navigate months on touch devices.
+* **Custom Event Templates**: Fully customizable HTML rendering for events with built-in or custom XSS-safe builders.
+* **Customizable Styles**: Uses CSS Custom Properties (`:root` variables) for seamless theming and Dark Mode.
+* **Accessibility (A11y) Compliant**: Fully navigable via Tab, Enter, and Space keys. Features dynamic `aria-selected` and `aria-current` attributes for Screen Readers.
 
 ## 🚀 Installation
 
@@ -40,10 +42,16 @@ or you can include the plugin by grabbing the compiled JavaScript from the `/dis
 * Moment.js
 
 ```html
+<!-- Core CSS -->
 <link rel="stylesheet" href="css/eventCalendar.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="dist/jquery.eventCalendar.js"></script>
+
+<!-- Dependencies -->
+<script src="[https://code.jquery.com/jquery-3.7.1.min.js](https://code.jquery.com/jquery-3.7.1.min.js)"></script>
+<script src="[https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js](https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js)"></script>
+
+<!-- Core Plugin and Unified Locales -->
+<script src="dist/umd/jquery.eventCalendar.js"></script>
+<script src="dist/locales/all.min.js"></script>
 ```
 
 **Include the Styles:**
@@ -76,6 +84,7 @@ const myEvents = [
 $('#myCalendar').eventCalendar({
     jsonData: myEvents,
     jsonDateFormat: "human", // "human" parses YYYY-MM-DD HH:MM:SS. "timestamp" parses unix ms.
+    locale: "en-US",         // Forces English. If omitted, falls back to the browser's language.
     showDescription: true,
     openEventInNewWindow: true
 });
@@ -98,27 +107,75 @@ $('#myCalendar').eventCalendar({
 
 #### 🌍 **Internationalization (i18n)**
 
-jQuery Event Calendar comes with built-in support for localization. The package includes translation files in the `dist/lcales/` directory.
+jQuery Event Calendar comes with a modern, namespace-driven localization system (``GpsEventCalendar.i18n``). You can load all languages at once using `all.min.js`, or load specific ones (e.g., `it-IT.js`).
 
-To use a different language, include the localized script *after* the main plugin script and pass it into the configuration:
+Unlike older versions, ​**you do not need to manually pass the i18n object**​. Just define the `locale` property:
 
 ```html
 <script src="dist/umd/jquery.eventCalendar.js"></script>
 <script src="dist/locales/it-IT.js"></script>
 
 <script>
-  $(document).ready(function() {
-    $("#calendar-wrapper").eventCalendar({
+  $(document).ready(function() {$("#calendar-wrapper").eventCalendar({
       jsonData: myEvents,
-      // Pass the specific locale key and the i18n object loaded in the window
-      localeKey: 'it-IT',
-      i18n: window.eventCalendar_i18n['it-IT']
+      // Just pass the locale code. The plugin will auto-resolve it from the global namespace!
+      // It also supports smart fallbacks (e.g., passing 'it' will automatically resolve to 'it-IT').
+      locale: 'it'
     });
   });
 </script>
 ```
 
-#### Theming & Dark Mode (CSS Native Variables)
+#### ⚡ **Runtime API Methods**
+
+You can interact with an already initialized calendar using the public method dispatcher. Currently, you can change the calendar language on the fly without reloading the page or re-fetching events:
+
+```JavaScript
+// Change the language to Spanish dynamically (proper locale must be loaded)
+$('#myCalendar').eventCalendar('changeLocale', 'es-ES');
+```
+
+**Destroy the instance safely:**
+If you need to remove the calendar (e.g., in a Single Page Application), use the `destroy` method to safely unbind all events and prevent memory leaks:
+
+```JavaScript
+$('#myCalendar').eventCalendar('destroy');
+```
+
+#### 🧩 **Custom Event Templates (Advanced)**
+
+If you want to render a completely custom UI for the events in the list (e.g., injecting images, custom buttons, or badges), you can pass an `eventTemplateBuilder` function in the options.
+
+> ⚠️ **SECURITY WARNING:** When overriding the internal builder, the plugin bypasses its native HTML sanitization. You **must** sanitize the event data (`event.title`, `event.description`, etc.) to prevent XSS attacks if the data comes from a user or external API.
+
+```JavaScript
+$('#myCalendar').eventCalendar({
+    jsonData: myEvents,
+    eventTemplateBuilder: function(event, i18nText) {
+        // Build your completely custom HTML structure
+        return `
+            <li class="custom-event-card">
+                <h4>${escapeHtml(event.title)}</h4>
+                <p>${escapeHtml(event.description)}</p>
+                <button onclick="bookCourse('${escapeHtml(event.url)}')">Book Now</button>
+            </li>
+        `;
+    }
+});
+
+// A simple utility to sanitize strings
+function escapeHtml(unsafe) {
+    if (!unsafe) return "";
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
+```
+
+#### 🎨 Theming & Dark Mode (CSS Native Variables)
 
 Version 2.0+ adopts CSS Custom Properties (`:root` variables) for styling. This makes the calendar easy to theme without needing to compile SCSS!
 
@@ -129,12 +186,9 @@ Version 2.0+ adopts CSS Custom Properties (`:root` variables) for styling. This 
 If you want to force a mode regardless the local OS configuration, you can use this js code:
 
 ```JavaScript
-// Toggle theme and enforce it globally via data attribute
+// Toggle theme and enforce it globally
 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 document.documentElement.setAttribute('data-theme', newTheme);
-
-// Toggle styles for the demo page background
-$('body').toggleClass('force-dark', newTheme === 'dark');
 ```
 
 **Custom theme**

@@ -1,3 +1,20 @@
+# What's New in v2.3.0
+
+This release elevates the plugin to enterprise standards, focusing on memory safety, mobile UX, security, and rendering flexibility.
+
+### 🚀 Core Architecture & Security
+* **Namespaced API**: All internal types and instances are now securely encapsulated within the `GpsEventCalendar` namespace, preventing any global scope pollution.
+* **Memory Leak Prevention**: Introduced the `destroy()` runtime method. It safely unbinds all delegated and window-level events tied to specific instances, making the plugin highly reliable for Single Page Applications (SPAs).
+* **XSS Protection**: The default internal event builder now rigorously sanitizes `title`, `description`, and `url` to prevent Cross-Site Scripting vulnerabilities when rendering backend data.
+
+### 📱 User Experience
+* **Native Swipe Support**: Added touch event listeners to the calendar slider. Mobile users can now naturally swipe left and right to navigate between months.
+* **Advanced Accessibility (A11y)**: Improved Screen Reader integration by dynamically toggling `aria-current="date"` for today's date and `aria-selected` upon user interaction.
+
+### 🧩 Flexibility
+* **Custom Event Templates**: Introduced the `eventTemplateBuilder` option. Dev
+---
+
 # What's New in v2.2.0
 
 This release introduces better support for multi language, included the dynamically load of the language configuration.
