@@ -46,8 +46,8 @@ or you can include the plugin by grabbing the compiled JavaScript from the `/dis
 <link rel="stylesheet" href="css/eventCalendar.css">
 
 <!-- Dependencies -->
-<script src="[https://code.jquery.com/jquery-3.7.1.min.js](https://code.jquery.com/jquery-3.7.1.min.js)"></script>
-<script src="[https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js](https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js)"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
 
 <!-- Core Plugin and Unified Locales -->
 <script src="dist/umd/jquery.eventCalendar.js"></script>
@@ -73,7 +73,7 @@ const myEvents = [
     {
         date: "2024-12-25 10:00:00",    // Date format depends on `jsonDateFormat` option
         title: "Christmas Track Day",   // Display name
-        url: "[https://example.com](https://example.com)",     // Optional link
+        url: "https://example.com",     // Optional link
         description: "Join us on the track for Christmas!", 
         isLocked: false,                // Show the "cross" icon on the calendar
         isSpecial: true                 // Show the "exclamation" coin icon

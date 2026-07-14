@@ -22,16 +22,9 @@ var init_EventCalendarInstance = __esm({
     "use strict";
     ((GpsEventCalendar2) => {
       class EventCalendarInstance {
-        /**
-         * Initializes a new Event Calendar instance.
-         * 
-         * @param element The physical DOM element to attach the calendar to.
-         * @param options The configuration options provided by the user.
-         */
         constructor(element, options) {
           this.cachedEvents = null;
           this.directionLeftMove = 300;
-          /** Unique ID for namespacing events to prevent memory leaks */
           this.instanceId = Math.random().toString(36).substr(2, 9);
           this.eventNamespace = `.gpsEventCalendar_${this.instanceId}`;
           this.$wrap = $(element);
@@ -39,9 +32,38 @@ var init_EventCalendarInstance = __esm({
           this.state = { year: 0, month: -1, day: 0, direction: "" };
           this.init();
         }
+        escapeHtml(unsafe) {
+          if (!unsafe) return "";
+          return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
         /**
-         * Safely destroys the instance, unbinding all memory-leaking events and removing all generated DOM.
+         * Extracts and parses the event date based on the plugin configuration.
+         * Restored dateTimeOffset logic from the legacy plugin.
          */
+        extractEventDate(event) {
+          if (!event.date) return null;
+          if (this.options.jsonDateFormat === "human") {
+            const eventDateTime = event.date.split(" ");
+            const splittedDate = eventDateTime[0].split("-");
+            const splittedTime = eventDateTime[1] ? eventDateTime[1].split(":") : ["0", "0", "0"];
+            return moment(new Date(
+              parseInt(splittedDate[0], 10),
+              parseInt(splittedDate[1], 10) - 1,
+              parseInt(splittedDate[2], 10),
+              parseInt(splittedTime[0], 10),
+              parseInt(splittedTime[1], 10),
+              parseInt(splittedTime[2], 10)
+            ));
+          } else {
+            const ts = Number(event.date);
+            if (event.offset != null) {
+              return moment.utc(ts).utcOffset(event.offset);
+            } else if (this.options.dateTimeOffset != null) {
+              return moment.utc(ts).utcOffset(this.options.dateTimeOffset);
+            }
+            return moment(ts);
+          }
+        }
         destroy() {
           $(window).off(this.eventNamespace);
           this.$wrap.off(this.eventNamespace);
@@ -49,36 +71,13 @@ var init_EventCalendarInstance = __esm({
           this.cachedEvents = null;
           $.removeData(this.$wrap[0], "plugin_eventCalendar");
         }
-        /**
-         * Public API method to change the language on the fly without reloading events from the server.
-         * Translations must already be bundled and available in window.GpsEventCalendar.i18n.
-         * 
-         * @param newLocale The new locale string (e.g., 'es-ES' or 'it').
-         */
         changeLocale(newLocale) {
           this.applyLocaleAndRender(newLocale, true);
         }
-        /**
-         * Safely escapes HTML characters to prevent Cross-Site Scripting (XSS).
-         * @param unsafe The raw string to sanitize.
-         */
-        escapeHtml(unsafe) {
-          if (!unsafe) return "";
-          return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-        /**
-         * Merges user-provided options with the plugin's default options.
-         * 
-         * @param options User-provided options.
-         * @returns A deeply merged options object.
-         */
         mergeOptions(options) {
           const defaults = $.fn.eventCalendar.options;
           return $.extend(true, {}, defaults, options);
         }
-        /**
-         * Bootstraps the application.
-         */
         init() {
           this.buildDOMStructure();
           this.attachEventListeners();
@@ -86,16 +85,17 @@ var init_EventCalendarInstance = __esm({
           $(window).on(`resize${this.eventNamespace}`, () => {
             this.directionLeftMove = this.$wrap.width() || 300;
           });
+          if (this.options.startDate) {
+            const parsedStart = this.extractEventDate({ date: this.options.startDate });
+            if (parsedStart && parsedStart.isValid()) {
+              this.state.year = parsedStart.year();
+              this.state.month = parsedStart.month();
+              this.state.day = parsedStart.date();
+            }
+          }
           const initialLocale = this.options.locale || navigator.language || navigator.userLanguage || "en-US";
           this.applyLocaleAndRender(initialLocale, false);
         }
-        /**
-         * Tries to resolve a given locale string against loaded dictionaries.
-         * Performs an exact match first, then falls back to base language match (e.g., 'it' -> 'it-IT').
-         * 
-         * @param locale Requested locale.
-         * @returns The resolved exact key in the dictionary, or null if unsupported.
-         */
         resolveLocale(locale) {
           const globalI18n = window.GpsEventCalendar?.i18n || {};
           if (globalI18n[locale]) return locale;
@@ -105,12 +105,24 @@ var init_EventCalendarInstance = __esm({
           }
           return null;
         }
-        /**
-         * Processes the requested locale and updates the calendar state.
-         * 
-         * @param requestedLocale The target locale string.
-         * @param isRuntimeChange True if triggered manually after init; false if during initialization.
-         */
+        applyFirstMonthWithEvents(events) {
+          if (!this.options.showFirstMonthWithEvents || !events || events.length === 0) return;
+          const eventsWithDate = events.filter((e) => e.date != null);
+          if (eventsWithDate.length === 0) return;
+          let earliestDate = this.extractEventDate(eventsWithDate[0]);
+          for (let i = 1; i < eventsWithDate.length; i++) {
+            const tempDate = this.extractEventDate(eventsWithDate[i]);
+            if (tempDate.valueOf() < earliestDate.valueOf()) {
+              earliestDate = tempDate;
+            }
+          }
+          const now = moment();
+          if (earliestDate.year() > now.year() || earliestDate.year() === now.year() && earliestDate.month() > now.month()) {
+            this.state.year = earliestDate.year();
+            this.state.month = earliestDate.month();
+            this.state.day = 0;
+          }
+        }
         applyLocaleAndRender(requestedLocale, isRuntimeChange) {
           const globalI18n = window.GpsEventCalendar?.i18n || {};
           const resolvedLocale = this.resolveLocale(requestedLocale);
@@ -129,12 +141,6 @@ var init_EventCalendarInstance = __esm({
           }
           this.applyActualLocale(resolvedLocale, globalI18n[resolvedLocale]);
         }
-        /**
-         * Physically applies the translation data, configures Moment.js, and redraws the UI.
-         * 
-         * @param localeKey Exact key in the dictionary.
-         * @param i18nData Translation data object.
-         */
         applyActualLocale(localeKey, i18nData) {
           this.options.locale = localeKey;
           this.options.i18n = i18nData;
@@ -149,13 +155,14 @@ var init_EventCalendarInstance = __esm({
           } else {
             moment.locale(momentLocaleCode);
           }
-          if (i18nData.moment && i18nData.moment.week && i18nData.moment.week.dow === 1) {
-            this.options.startWeekOnMonday = true;
-          } else {
-            this.options.startWeekOnMonday = false;
+          this.options.startWeekOnMonday = !!(i18nData.moment && i18nData.moment.week && i18nData.moment.week.dow === 1);
+          if (Array.isArray(this.options.jsonData) && !this.options.startDate) {
+            this.cachedEvents = this.options.jsonData;
+            this.applyFirstMonthWithEvents(this.cachedEvents);
           }
           this.$wrap.find(".eventCalendar-slider").empty();
-          this.renderMonth("current");
+          const initialRenderMode = this.state.day > 0 ? "current" : "current";
+          this.renderMonth(initialRenderMode);
           if (this.cachedEvents) {
             this.renderEventsList(this.cachedEvents);
             this.updateSubtitle();
@@ -163,36 +170,39 @@ var init_EventCalendarInstance = __esm({
             this.fetchAndRenderEvents();
           }
         }
-        /**
-         * Constructs the main HTML skeleton inside the wrapper element.
-         */
         buildDOMStructure() {
           const loadingTxt = this.options.i18n?.txt_loading || "loading...";
           this.$wrap.addClass("eventCalendar-wrap").html(`
-              <div class='eventCalendar-slider'></div>
-              <div class='eventCalendar-list-wrap' aria-live="polite">
-                  <p class='eventCalendar-subtitle'></p>
-                  <span class='eventCalendar-loading'>${loadingTxt}</span>
-                  <div class='eventCalendar-list-content ${this.options.eventsScrollable ? "scrollable" : ""}'>
-                      <ul class='eventCalendar-list'></ul>
-                  </div>
-              </div>
-          `);
+                <div class='eventCalendar-slider'></div>
+                <div class='eventCalendar-list-wrap' aria-live="polite">
+                    <p class='eventCalendar-subtitle'></p>
+                    <span class='eventCalendar-loading'>${loadingTxt}</span>
+                    <div class='eventCalendar-list-content ${this.options.eventsScrollable ? "scrollable" : ""}'>
+                        <ul class='eventCalendar-list'></ul>
+                    </div>
+                </div>
+            `);
         }
-        /**
-         * Binds click and keyboard events to the dynamically generated DOM elements.
-         */
         attachEventListeners() {
           this.$wrap.on(`click${this.eventNamespace}`, '[name="arrow"]', (e) => {
             e.preventDefault();
             const direction = $(e.currentTarget).attr("data-dir");
             this.changeMonth(direction);
           });
-          this.$wrap.on(`click${this.eventNamespace}`, 'li[id^="dayList_"] a', (e) => {
+          this.$wrap.on(`click${this.eventNamespace}`, ".eventCalendar-monthTitle", (e) => {
             e.preventDefault();
-            const day = parseInt($(e.currentTarget).parent().attr("rel") || "0", 10);
+            this.state.day = 0;
+            this.state.direction = "month";
+            this.$wrap.find(".eventCalendar-day a").attr("aria-selected", "false");
+            this.fetchAndRenderEvents();
+          });
+          this.$wrap.on(`click${this.eventNamespace}`, ".eventCalendar-day a", (e) => {
+            e.preventDefault();
+            const dayAttr = $(e.currentTarget).parent().attr("rel");
+            if (!dayAttr) return;
+            const day = parseInt(dayAttr, 10);
             this.state = { ...this.state, day, direction: "day" };
-            this.$wrap.find('li[id^="dayList_"] a').attr("aria-selected", "false");
+            this.$wrap.find(".eventCalendar-day a").attr("aria-selected", "false");
             $(e.currentTarget).attr("aria-selected", "true");
             this.fetchAndRenderEvents();
             if (this.options.callbacks?.changeDay) {
@@ -206,7 +216,7 @@ var init_EventCalendarInstance = __esm({
               if (!$desc.find("a.bt").length) {
                 const url = $(e.currentTarget).attr("href");
                 const target = $(e.currentTarget).attr("target") || "_self";
-                if (url) {
+                if (url && url !== "#") {
                   const gotoTxt = this.options.i18n?.txt_GoToEventUrl || "Go to event";
                   $desc.append($("<a>").attr({ href: url, target, class: "bt" }).text(gotoTxt));
                 }
@@ -221,7 +231,7 @@ var init_EventCalendarInstance = __esm({
               }
             }
           });
-          this.$wrap.on(`keydown${this.eventNamespace}`, '[name="arrow"], li[id^="dayList_"] a, .eventCalendar-eventTitle', (e) => {
+          this.$wrap.on(`keydown${this.eventNamespace}`, '[name="arrow"], .eventCalendar-day a, .eventCalendar-eventTitle', (e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               $(e.currentTarget).trigger("click");
@@ -238,10 +248,6 @@ var init_EventCalendarInstance = __esm({
             if (touchEndX > touchStartX + 50) this.changeMonth("prev");
           });
         }
-        /**
-         * Animates the transition between months.
-         * @param direction Target direction to slide the calendar.
-         */
         changeMonth(direction) {
           this.renderMonth(direction);
           const moveOperator = direction === "next" ? "-=" : "+=";
@@ -258,36 +264,42 @@ var init_EventCalendarInstance = __esm({
             }
           );
         }
-        /**
-         * Builds and renders the grid for the requested month.
-         * @param monthOrDirection Direction to render relative to the current state.
-         */
         renderMonth(monthOrDirection) {
           const $slider = this.$wrap.find(".eventCalendar-slider");
-          const date = /* @__PURE__ */ new Date();
+          let targetYear = this.state.year > 0 ? this.state.year : (/* @__PURE__ */ new Date()).getFullYear();
+          let targetMonth = this.state.month >= 0 ? this.state.month : (/* @__PURE__ */ new Date()).getMonth();
           this.$wrap.find(".eventCalendar-monthWrap.eventCalendar-currentMonth").removeClass("eventCalendar-currentMonth").addClass("eventCalendar-oldMonth");
-          if (monthOrDirection !== "current") {
-            date.setFullYear(this.state.year, this.state.month, 1);
-            date.setMonth(date.getMonth() + (monthOrDirection === "prev" ? -1 : 1));
+          if (monthOrDirection === "next") {
+            targetMonth++;
+            if (targetMonth > 11) {
+              targetMonth = 0;
+              targetYear++;
+            }
+          } else if (monthOrDirection === "prev") {
+            targetMonth--;
+            if (targetMonth < 0) {
+              targetMonth = 11;
+              targetYear--;
+            }
           }
-          this.state.year = date.getFullYear();
-          this.state.month = date.getMonth();
+          this.state.year = targetYear;
+          this.state.month = targetMonth;
           const monthTitle = moment(new Date(this.state.year, this.state.month, 1)).format("MMMM YYYY");
           const $newMonthWrap = $(`
-              <div class='eventCalendar-monthWrap eventCalendar-currentMonth'>
-                  <div class='eventCalendar-currentTitle'>
-                      <a href='#' class='eventCalendar-monthTitle'>${monthTitle}</a>
-                  </div>
-                  <ul class='eventCalendar-daysList ${this.options.showDayAsWeeks ? "eventCalendar-showAsWeek" : ""}'></ul>
-              </div>
-          `);
+                <div class='eventCalendar-monthWrap eventCalendar-currentMonth'>
+                    <div class='eventCalendar-currentTitle'>
+                        <a href='#' class='eventCalendar-monthTitle'>${monthTitle}</a>
+                    </div>
+                    <ul class='eventCalendar-daysList ${this.options.showDayAsWeeks ? "eventCalendar-showAsWeek" : ""}'></ul>
+                </div>
+            `);
           if (monthOrDirection === "current") {
             const txtPrev = this.options.i18n?.txt_prev || "prev";
             const txtNext = this.options.i18n?.txt_next || "next";
             $slider.append(`
-                  <a name='arrow' data-dir='prev' href='#' class='eventCalendar-arrow eventCalendar-prev' role="button" tabindex="0" aria-label="${txtPrev}"><span>${txtPrev}</span></a>
-                  <a name='arrow' data-dir='next' href='#' class='eventCalendar-arrow eventCalendar-next' role="button" tabindex="0" aria-label="${txtNext}"><span>${txtNext}</span></a>
-              `);
+                    <a name='arrow' data-dir='prev' href='#' class='eventCalendar-arrow eventCalendar-prev' role="button" tabindex="0" aria-label="${txtPrev}"><span>${txtPrev}</span></a>
+                    <a name='arrow' data-dir='next' href='#' class='eventCalendar-arrow eventCalendar-next' role="button" tabindex="0" aria-label="${txtNext}"><span>${txtNext}</span></a>
+                `);
           }
           const $daysList = $newMonthWrap.find(".eventCalendar-daysList");
           if (this.options.showDayAsWeeks) {
@@ -312,17 +324,18 @@ var init_EventCalendarInstance = __esm({
             }
           }
           const daysInMonth = new Date(this.state.year, this.state.month + 1, 0).getDate();
-          const currentDay = (/* @__PURE__ */ new Date()).getDate();
-          const isCurrentMonth = date.getMonth() === (/* @__PURE__ */ new Date()).getMonth() && date.getFullYear() === (/* @__PURE__ */ new Date()).getFullYear();
+          const dateObj = /* @__PURE__ */ new Date();
+          const currentDay = dateObj.getDate();
+          const isCurrentMonth = this.state.month === dateObj.getMonth() && this.state.year === dateObj.getFullYear();
           for (let day = 1; day <= daysInMonth; day++) {
             const isToday = isCurrentMonth && day === currentDay;
             const todayClass = isToday ? "today" : "";
             const ariaCurrent = isToday ? 'aria-current="date"' : "";
             const ariaSelected = this.state.day === day ? 'aria-selected="true"' : 'aria-selected="false"';
             $daysList.append(
-              `<li id='dayList_${day}' rel='${day}' class='eventCalendar-day ${todayClass}'>
-              <a href='#' tabindex="0" aria-label="${day} ${monthTitle}" ${ariaCurrent} ${ariaSelected}>${day}</a>
-           </li>`
+              `<li rel='${day}' class='eventCalendar-day ${todayClass}'>
+                        <a href='#' tabindex="0" aria-label="${day} ${monthTitle}" ${ariaCurrent} ${ariaSelected}>${day}</a>
+                     </li>`
             );
           }
           if (this.options.showDayAsWeeks) {
@@ -336,15 +349,13 @@ var init_EventCalendarInstance = __esm({
           $slider.css("height", $newMonthWrap.height() + "px");
           if (monthOrDirection !== "current") {
             this.state.direction = monthOrDirection;
+            this.state.day = 0;
             this.fetchAndRenderEvents();
           }
         }
-        /**
-         * Updates the subtitle text based on the current view state.
-         */
         updateSubtitle() {
           const $subtitle = this.$wrap.find(".eventCalendar-subtitle");
-          if (this.state.direction === "day") {
+          if (this.state.direction === "day" && this.state.day > 0) {
             const dateObj = new Date(this.state.year, this.state.month, this.state.day);
             const dateStr = moment(dateObj).format("LL");
             const prevTxt = this.options.i18n?.txt_SpecificEvents_prev || "";
@@ -355,17 +366,12 @@ var init_EventCalendarInstance = __esm({
             $subtitle.text(nextTxt);
           }
         }
-        /**
-         * Fetches events via AJAX or reads from the local array.
-         */
         fetchAndRenderEvents() {
           this.$wrap.find(".eventCalendar-loading").fadeIn();
           this.updateSubtitle();
           if (typeof this.options.jsonData === "string") {
             if (!this.options.cacheJson || !this.cachedEvents) {
-              $.getJSON(
-                `${this.options.jsonData}?limit=${this.options.eventsLimit}&year=${this.state.year}&month=${this.state.month}&day=${this.state.day}`
-              ).done((data) => {
+              $.getJSON(`${this.options.jsonData}?limit=${this.options.eventsLimit}&year=${this.state.year}&month=${this.state.month}&day=${this.state.day}`).done((data) => {
                 this.cachedEvents = data;
                 this.renderEventsList(data);
               }).fail(() => {
@@ -380,30 +386,72 @@ var init_EventCalendarInstance = __esm({
             this.renderEventsList(this.cachedEvents);
           }
         }
-        /**
-         * Generates and appends the HTML list of events.
-         * @param data Array of events to be displayed.
-         */
+        markDaysWithEvents(data) {
+          const $days = this.$wrap.find(".eventCalendar-currentMonth .eventCalendar-day");
+          $days.removeClass("eventCalendar-dayWithEvents dayWithEvents locked special");
+          data.forEach((event) => {
+            const eventDate = this.extractEventDate(event);
+            if (!eventDate) return;
+            if (eventDate.year() === this.state.year && eventDate.month() === this.state.month) {
+              const day = eventDate.date();
+              const $dayCell = this.$wrap.find(`.eventCalendar-currentMonth .eventCalendar-day[rel="${day}"]`);
+              $dayCell.addClass("eventCalendar-dayWithEvents dayWithEvents");
+              if (event.isLocked) $dayCell.addClass("locked");
+              if (event.isSpecial) $dayCell.addClass("special");
+            }
+          });
+        }
         renderEventsList(data) {
           const $list = this.$wrap.find(".eventCalendar-list");
           let htmlEvents = [];
-          data.forEach((event, index) => {
-            if (this.options.eventTemplateBuilder && this.options.i18n) {
-              htmlEvents.push(this.options.eventTemplateBuilder(event, this.options.i18n));
-              return;
+          let numOfFilteredEvents = 0;
+          const limit = this.options.eventsLimit || 0;
+          this.markDaysWithEvents(data);
+          const sortedEvents = [...data].sort((a, b) => {
+            if (!a.date) return -1;
+            if (!b.date) return 1;
+            if (typeof a.date === "string" && typeof b.date === "string") {
+              return a.date.toLowerCase() > b.date.toLowerCase() ? 1 : -1;
             }
-            const safeTitle = this.escapeHtml(event.title);
-            const safeDesc = this.escapeHtml(event.description);
-            const safeUrl = this.escapeHtml(event.url);
-            const eventLinkTarget = this.options.openEventInNewWindow ? "_blank" : "_self";
-            const titleHtml = safeUrl ? `<a href="${safeUrl}" target="${eventLinkTarget}" class="eventCalendar-eventTitle clearfix">${safeTitle}</a>` : `<span class="eventCalendar-eventTitle clearfix">${safeTitle}</span>`;
-            const eventDescClass = !this.options.showDescription ? "eventCalendar-hidden" : "";
-            htmlEvents.push(`
-                  <li id="event_${index}" class="clearfix">
-                      ${titleHtml}
-                      <div class="eventCalendar-eventDesc ${eventDescClass}">${safeDesc}</div>
-                  </li>
-              `);
+            return a.date > b.date ? 1 : -1;
+          });
+          const isDaySelected = this.state.day > 0 && this.state.month >= 0 && this.state.year >= 1970;
+          sortedEvents.forEach((event) => {
+            if (limit > 0 && numOfFilteredEvents >= limit) return;
+            const eventDate = this.extractEventDate(event);
+            const eventYear = eventDate ? eventDate.year() : null;
+            const eventMonth = eventDate ? eventDate.month() : null;
+            const eventDay = eventDate ? eventDate.date() : null;
+            let shouldShow = false;
+            if (!eventDate && this.options.showEventsWithoutDate && !isDaySelected) {
+              shouldShow = true;
+            } else if (eventDate) {
+              const matchMonth = this.state.month < 0 || this.state.month === eventMonth;
+              const matchDay = this.state.day === 0 || this.state.day === eventDay;
+              const matchYear = this.state.year === 0 || this.state.year === eventYear;
+              if (matchMonth && matchDay && matchYear) {
+                shouldShow = true;
+              }
+            }
+            if (shouldShow) {
+              numOfFilteredEvents++;
+              if (this.options.eventTemplateBuilder && this.options.i18n) {
+                htmlEvents.push(this.options.eventTemplateBuilder(event, this.options.i18n));
+              } else {
+                const safeTitle = this.escapeHtml(event.title);
+                const safeDesc = this.escapeHtml(event.description);
+                const safeUrl = this.escapeHtml(event.url);
+                const eventLinkTarget = this.options.openEventInNewWindow ? "_blank" : "_self";
+                const titleHtml = safeUrl && safeUrl !== "#" ? `<a href="${safeUrl}" target="${eventLinkTarget}" class="eventCalendar-eventTitle clearfix">${safeTitle}</a>` : `<span class="eventCalendar-eventTitle clearfix">${safeTitle}</span>`;
+                const eventDescClass = !this.options.showDescription ? "eventCalendar-hidden" : "";
+                htmlEvents.push(`
+                            <li class="clearfix">
+                                ${titleHtml}
+                                <div class="eventCalendar-eventDesc ${eventDescClass}">${safeDesc}</div>
+                            </li>
+                        `);
+              }
+            }
           });
           if (htmlEvents.length === 0) {
             const noEventsTxt = this.options.i18n?.txt_noEvents || "No events";
@@ -449,7 +497,9 @@ var require_jquery_eventCalendar = __commonJS({
       showDayAsWeeks: true,
       showDescription: false,
       moveSpeed: 500,
-      moveOpacity: 0.15
+      moveOpacity: 0.15,
+      startDate: void 0,
+      dateTimeOffset: void 0
     };
     $.fn.eventCalendar = pluginFn;
   }

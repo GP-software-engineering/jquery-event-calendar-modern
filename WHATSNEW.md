@@ -1,18 +1,36 @@
+# What's New in v2.3.1
+
+This release addresses critical bugs introduced during the architectural overhaul and restores full backward compatibility with legacy configuration options.
+
+### 🐛 Bug Fixes
+* **Event Filtering**: Restored the strict event filtering logic. Clicking on a specific day correctly filters and displays only the events for that day, rather than the entire month.
+* **Grid Highlighting**: Fixed an issue where days with events were not properly highlighted on the calendar grid. Resolved DOM ID collisions by safely targeting cells via the `rel` attribute.
+
+### ⏪ Legacy Compatibility
+* **Restored Options**: Brought back `startDate` and `dateTimeOffset` configuration options to ensure seamless updates for legacy implementations.
+* **Cleanup**: Removed the phantom `changeMonth` callback from default options as it was never internally triggered.
+
+---
+
 # What's New in v2.3.0
 
 This release elevates the plugin to enterprise standards, focusing on memory safety, mobile UX, security, and rendering flexibility.
 
 ### 🚀 Core Architecture & Security
+
 * **Namespaced API**: All internal types and instances are now securely encapsulated within the `GpsEventCalendar` namespace, preventing any global scope pollution.
 * **Memory Leak Prevention**: Introduced the `destroy()` runtime method. It safely unbinds all delegated and window-level events tied to specific instances, making the plugin highly reliable for Single Page Applications (SPAs).
 * **XSS Protection**: The default internal event builder now rigorously sanitizes `title`, `description`, and `url` to prevent Cross-Site Scripting vulnerabilities when rendering backend data.
 
 ### 📱 User Experience
+
 * **Native Swipe Support**: Added touch event listeners to the calendar slider. Mobile users can now naturally swipe left and right to navigate between months.
 * **Advanced Accessibility (A11y)**: Improved Screen Reader integration by dynamically toggling `aria-current="date"` for today's date and `aria-selected` upon user interaction.
 
 ### 🧩 Flexibility
+
 * **Custom Event Templates**: Introduced the `eventTemplateBuilder` option. Dev
+
 ---
 
 # What's New in v2.2.0

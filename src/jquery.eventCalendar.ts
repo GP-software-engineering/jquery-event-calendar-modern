@@ -12,14 +12,11 @@ const pluginFn = function(this: any, options?: Types.IEventCalendarOptions | str
         let instance = $.data(this, "plugin_eventCalendar") as GpsEventCalendar.EventCalendarInstance;
         
         if (!instance) {
-            // Prevent attempting to call public methods on uninitialized DOM elements
             if (typeof options === "string") return; 
             
-            // Note: Instantiating the class nested within the exported namespace
             instance = new GpsEventCalendar.EventCalendarInstance(this, options || { jsonData: [] });
             $.data(this, "plugin_eventCalendar", instance);
         } else if (typeof options === "string") {
-            // Public method dispatcher
             switch (options) {
                 case "changeLocale":
                     if (args.length > 0) instance.changeLocale(args[0]);
@@ -43,7 +40,9 @@ pluginFn.options = {
     showDayAsWeeks: true,
     showDescription: false,
     moveSpeed: 500,
-    moveOpacity: 0.15
+    moveOpacity: 0.15,
+    startDate: undefined,
+    dateTimeOffset: undefined
 };
 
 $.fn.eventCalendar = pluginFn;
