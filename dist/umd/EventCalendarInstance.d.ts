@@ -31,6 +31,12 @@ export declare namespace GpsEventCalendar {
          */
         changeLocale(newLocale: string): void;
         /**
+         * Displays a toast message to the user.
+         * @param message The message to display
+         * @param duration For how long the message should be visible (default 3000ms)
+         */
+        showToastMessage(message: string, duration?: number): void;
+        /**
          * Destroys the calendar instance, removes DOM structures, and unbinds all namespaced events.
          */
         destroy(): void;

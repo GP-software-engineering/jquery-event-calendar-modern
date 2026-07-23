@@ -1,11 +1,16 @@
+# What's New in v2.5.0
+
+This release adds the `showToastMessage` method to the plugin to display a temporary message into calendar.
+---
+
 # What's New in v2.4.0
 
 This release adds the `setEvents` method to the plugin to dynamically updates the dataset of the calendar without destroying the DOM structure, increasing the calendar speed.
+---
 
 # What's New in v2.3.2
 
 This release addresses a bug on small images not displayed when an event was marked with bugs `isSpecial = true `.
-
 ---
 
 # What's New in v2.3.1
@@ -21,7 +26,6 @@ This release addresses critical bugs introduced during the architectural overhau
 
 * **Restored Options**: Brought back `startDate` and `dateTimeOffset` configuration options to ensure seamless updates for legacy implementations.
 * **Cleanup**: Removed the phantom `changeMonth` callback from default options as it was never internally triggered.
-
 ---
 
 # What's New in v2.3.0

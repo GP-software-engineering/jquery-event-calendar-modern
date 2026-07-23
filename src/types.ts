@@ -127,11 +127,29 @@ export interface IEventCalendarPlugin {
 }
 
 declare global {
-    interface Window {
-        GpsEventCalendar: {
-            i18n: { [key: string]: GpsEventCalendar.II18n };
-        };
+
+    /**
+     * Defines the structure of the global GpsEventCalendar namespace and localization dictionary.
+     */
+    interface IGpsEventCalendarGlobal {
+        i18n: { [key: string]: GpsEventCalendar.II18n };
     }
+
+    /**
+     * Extends the standard browser Window interface.
+     */
+    interface Window {
+        GpsEventCalendar: IGpsEventCalendarGlobal;
+    }
+
+    /**
+     * Declares the GpsEventCalendar variable in the universal global scope to merge this type into 'globalThis',
+     */
+    var GpsEventCalendar: IGpsEventCalendarGlobal;
+
+    /**
+     * Extends JQuery interface to include the custom eventCalendar plugin method.
+     */
     interface JQuery {
         eventCalendar: IEventCalendarPlugin;
     }

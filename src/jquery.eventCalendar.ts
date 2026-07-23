@@ -24,6 +24,9 @@ const pluginFn = function(this: any, options?: Types.IEventCalendarOptions | str
                 case "setEvents":
                     if (args.length > 0) instance.setEvents(args[0], args[1] ?? true);
                     break;
+                case "showToastMessage":
+                    if (args.length > 0) instance.showToastMessage(args[0], args[1] ?? 3000);
+                    break;
                 case "destroy":
                     instance.destroy();
                     break;

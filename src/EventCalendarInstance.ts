@@ -62,6 +62,17 @@ export namespace GpsEventCalendar {
         }
 
         /**
+         * Displays a toast message to the user.
+         * @param message The message to display
+         * @param duration For how long the message should be visible (default 3000ms)
+         */
+        public showToastMessage(message: string, duration: number = 3000): void {
+            const $loading = this.$wrap.find(".eventCalendar-loading");
+            $loading.text(message).addClass("error").show();
+            setTimeout(() => { $loading.fadeOut().removeClass("error"); }, duration);
+        }
+
+        /**
          * Destroys the calendar instance, removes DOM structures, and unbinds all namespaced events.
          */
         public destroy(): void {
@@ -217,9 +228,7 @@ export namespace GpsEventCalendar {
 
             if (!resolvedLocale) {
                 console.warn(`[EventCalendar] Locale '${requestedLocale}' not found.`);
-                const $loading = this.$wrap.find(".eventCalendar-loading");
-                $loading.text("Language not found").addClass("error").show();
-                setTimeout(() => { $loading.fadeOut().removeClass("error"); }, 3000);
+                this.showToastMessage("Language not found");
 
                 if (!isRuntimeChange) {
                     const fallback = globalI18n["en-US"] ? "en-US" : Object.keys(globalI18n)[0];

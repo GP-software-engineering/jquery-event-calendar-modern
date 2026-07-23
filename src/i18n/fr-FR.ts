@@ -5,10 +5,10 @@
 import { GpsEventCalendar } from '../types';
 
 // Ensure the global namespace and i18n dictionary exist
-window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
-window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
+globalThis.GpsEventCalendar = globalThis.GpsEventCalendar || { i18n: {} };
+globalThis.GpsEventCalendar.i18n = globalThis.GpsEventCalendar.i18n || {};
 
-window.GpsEventCalendar.i18n['fr-FR'] = <GpsEventCalendar.II18n>{
+globalThis.GpsEventCalendar.i18n['fr-FR'] = <GpsEventCalendar.II18n>{
 	locale: "fr",
 	monthNames: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
 	monthNamesShort: ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc."],

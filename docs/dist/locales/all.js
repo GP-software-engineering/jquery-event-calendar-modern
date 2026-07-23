@@ -34,9 +34,9 @@
   var require_en_US = __commonJS({
     "src/i18n/en-US.ts"() {
       "use strict";
-      window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
-      window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
-      window.GpsEventCalendar.i18n["en-US"] = {
+      globalThis.GpsEventCalendar = globalThis.GpsEventCalendar || { i18n: {} };
+      globalThis.GpsEventCalendar.i18n = globalThis.GpsEventCalendar.i18n || {};
+      globalThis.GpsEventCalendar.i18n["en-US"] = {
         locale: "en-us",
         monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
         monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
@@ -44,7 +44,9 @@
         dayNamesShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
         txt_noEvents: "No events for this period",
         txt_SpecificEvents_prev: "Events on",
+        // text before the long date of a specific day
         txt_SpecificEvents_after: ":",
+        // text after the long date of a specific day
         txt_next: "next",
         txt_prev: "prev",
         txt_NextEvents: "Next events:",
@@ -80,9 +82,9 @@
   var require_it_IT = __commonJS({
     "src/i18n/it-IT.ts"() {
       "use strict";
-      window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
-      window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
-      window.GpsEventCalendar.i18n["it-IT"] = {
+      globalThis.GpsEventCalendar = globalThis.GpsEventCalendar || { i18n: {} };
+      globalThis.GpsEventCalendar.i18n = globalThis.GpsEventCalendar.i18n || {};
+      globalThis.GpsEventCalendar.i18n["it-IT"] = {
         locale: "it",
         monthNames: ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"],
         monthNamesShort: ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"],
@@ -135,9 +137,9 @@
   var require_es_ES = __commonJS({
     "src/i18n/es-ES.ts"() {
       "use strict";
-      window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
-      window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
-      window.GpsEventCalendar.i18n["es-ES"] = {
+      globalThis.GpsEventCalendar = globalThis.GpsEventCalendar || { i18n: {} };
+      globalThis.GpsEventCalendar.i18n = globalThis.GpsEventCalendar.i18n || {};
+      globalThis.GpsEventCalendar.i18n["es-ES"] = {
         locale: "es",
         monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
         monthNamesShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Julio", "Ago", "Sep", "Oct", "Nov", "Dic"],
@@ -180,9 +182,9 @@
   var require_fr_FR = __commonJS({
     "src/i18n/fr-FR.ts"() {
       "use strict";
-      window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
-      window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
-      window.GpsEventCalendar.i18n["fr-FR"] = {
+      globalThis.GpsEventCalendar = globalThis.GpsEventCalendar || { i18n: {} };
+      globalThis.GpsEventCalendar.i18n = globalThis.GpsEventCalendar.i18n || {};
+      globalThis.GpsEventCalendar.i18n["fr-FR"] = {
         locale: "fr",
         monthNames: ["Janvier", "F\xE9vrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Ao\xFBt", "Septembre", "Octobre", "Novembre", "D\xE9cembre"],
         monthNamesShort: ["Janv.", "F\xE9vr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Ao\xFBt", "Sept.", "Oct.", "Nov.", "D\xE9c."],
@@ -225,9 +227,9 @@
   var require_de_DE = __commonJS({
     "src/i18n/de-DE.ts"() {
       "use strict";
-      window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
-      window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
-      window.GpsEventCalendar.i18n["de-DE"] = {
+      globalThis.GpsEventCalendar = globalThis.GpsEventCalendar || { i18n: {} };
+      globalThis.GpsEventCalendar.i18n = globalThis.GpsEventCalendar.i18n || {};
+      globalThis.GpsEventCalendar.i18n["de-DE"] = {
         locale: "de",
         monthNames: ["Januar", "Februar", "M\xE4rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
         monthNamesShort: ["Jan.", "Feb.", "Mrz.", "Apr.", "Mai", "Jun.", "Jul.", "Aug.", "Sep.", "Okt.", "Nov.", "Dez."],
@@ -270,9 +272,9 @@
   var require_pt_PT = __commonJS({
     "src/i18n/pt-PT.ts"() {
       "use strict";
-      window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
-      window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
-      window.GpsEventCalendar.i18n["pt-PT"] = {
+      globalThis.GpsEventCalendar = globalThis.GpsEventCalendar || { i18n: {} };
+      globalThis.GpsEventCalendar.i18n = globalThis.GpsEventCalendar.i18n || {};
+      globalThis.GpsEventCalendar.i18n["pt-PT"] = {
         locale: "pt",
         monthNames: ["Janeiro", "Fevereiro", "Mar\xE7o", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
         monthNamesShort: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
@@ -315,9 +317,9 @@
   var require_zh_CN = __commonJS({
     "src/i18n/zh-CN.ts"() {
       "use strict";
-      window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
-      window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
-      window.GpsEventCalendar.i18n["zh-CN"] = {
+      globalThis.GpsEventCalendar = globalThis.GpsEventCalendar || { i18n: {} };
+      globalThis.GpsEventCalendar.i18n = globalThis.GpsEventCalendar.i18n || {};
+      globalThis.GpsEventCalendar.i18n["zh-CN"] = {
         locale: "zh-cn",
         monthNames: ["\u4E00\u6708", "\u4E8C\u6708", "\u4E09\u6708", "\u56DB\u6708", "\u4E94\u6708", "\u516D\u6708", "\u4E03\u6708", "\u516B\u6708", "\u4E5D\u6708", "\u5341\u6708", "\u5341\u4E00\u6708", "\u5341\u4E8C\u6708"],
         monthNamesShort: ["1\u6708", "2\u6708", "3\u6708", "4\u6708", "5\u6708", "6\u6708", "7\u6708", "8\u6708", "9\u6708", "10\u6708", "11\u6708", "12\u6708"],

@@ -64,6 +64,18 @@
             this.applyLocaleAndRender(newLocale, true);
           }
           /**
+           * Displays a toast message to the user.
+           * @param message The message to display
+           * @param duration For how long the message should be visible (default 3000ms)
+           */
+          showToastMessage(message, duration = 3e3) {
+            const $loading = this.$wrap.find(".eventCalendar-loading");
+            $loading.text(message).addClass("error").show();
+            setTimeout(() => {
+              $loading.fadeOut().removeClass("error");
+            }, duration);
+          }
+          /**
            * Destroys the calendar instance, removes DOM structures, and unbinds all namespaced events.
            */
           destroy() {
@@ -194,11 +206,7 @@
             const resolvedLocale = this.resolveLocale(requestedLocale);
             if (!resolvedLocale) {
               console.warn(`[EventCalendar] Locale '${requestedLocale}' not found.`);
-              const $loading = this.$wrap.find(".eventCalendar-loading");
-              $loading.text("Language not found").addClass("error").show();
-              setTimeout(() => {
-                $loading.fadeOut().removeClass("error");
-              }, 3e3);
+              this.showToastMessage("Language not found");
               if (!isRuntimeChange) {
                 const fallback = globalI18n["en-US"] ? "en-US" : Object.keys(globalI18n)[0];
                 if (fallback) this.applyActualLocale(fallback, globalI18n[fallback]);
@@ -607,6 +615,9 @@
                 break;
               case "setEvents":
                 if (args.length > 0) instance.setEvents(args[0], args[1] ?? true);
+                break;
+              case "showToastMessage":
+                if (args.length > 0) instance.showToastMessage(args[0], args[1] ?? 3e3);
                 break;
               case "destroy":
                 instance.destroy();

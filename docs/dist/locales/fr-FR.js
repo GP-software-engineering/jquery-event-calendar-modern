@@ -12,9 +12,9 @@
   // src/i18n/fr-FR.ts
   var require_fr_FR = __commonJS({
     "src/i18n/fr-FR.ts"() {
-      window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
-      window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
-      window.GpsEventCalendar.i18n["fr-FR"] = {
+      globalThis.GpsEventCalendar = globalThis.GpsEventCalendar || { i18n: {} };
+      globalThis.GpsEventCalendar.i18n = globalThis.GpsEventCalendar.i18n || {};
+      globalThis.GpsEventCalendar.i18n["fr-FR"] = {
         locale: "fr",
         monthNames: ["Janvier", "F\xE9vrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Ao\xFBt", "Septembre", "Octobre", "Novembre", "D\xE9cembre"],
         monthNamesShort: ["Janv.", "F\xE9vr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Ao\xFBt", "Sept.", "Oct.", "Nov.", "D\xE9c."],

@@ -12,9 +12,9 @@
   // src/i18n/en-US.ts
   var require_en_US = __commonJS({
     "src/i18n/en-US.ts"() {
-      window.GpsEventCalendar = window.GpsEventCalendar || { i18n: {} };
-      window.GpsEventCalendar.i18n = window.GpsEventCalendar.i18n || {};
-      window.GpsEventCalendar.i18n["en-US"] = {
+      globalThis.GpsEventCalendar = globalThis.GpsEventCalendar || { i18n: {} };
+      globalThis.GpsEventCalendar.i18n = globalThis.GpsEventCalendar.i18n || {};
+      globalThis.GpsEventCalendar.i18n["en-US"] = {
         locale: "en-us",
         monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
         monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
@@ -22,7 +22,9 @@
         dayNamesShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
         txt_noEvents: "No events for this period",
         txt_SpecificEvents_prev: "Events on",
+        // text before the long date of a specific day
         txt_SpecificEvents_after: ":",
+        // text after the long date of a specific day
         txt_next: "next",
         txt_prev: "prev",
         txt_NextEvents: "Next events:",
